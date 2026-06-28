@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Referral Outreach Generator</title>
+<style>
+  :root{
+    --ink:#1c1f26;
+    --paper:#f6f4ee;
+    --line:#d8d3c4;
+    --accent:#a6402c;
+    --accent-soft:#f0e2dc;
+    --mono:#52555c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Georgia', 'Iowan Old Style', serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{
+    font-size:1.5rem;
+    letter-spacing:0.02em;
+    margin:0 0 4px;
+  }
+  .sub{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    color:var(--mono);
+    font-size:0.85rem;
+    margin:0 0 28px;
+  }
+  .tabs{
+    display:flex;
+    gap:2px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:24px;
+  }
+  .tab-btn{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    flex:1;
+    padding:10px 6px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    font-size:0.85rem;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--mono);
+    border-bottom:3px solid transparent;
+    transition:0.15s;
+  }
+  .tab-btn.active{
+    color:var(--ink);
+    border-bottom:3px solid var(--accent);
+    font-weight:600;
+  }
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .field{margin-bottom:14px;}
+  label{
+    display:block;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--mono);
+    margin-bottom:4px;
+  }
+  input, textarea{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    background:#fff;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.92rem;
+    color:var(--ink);
+    border-radius:2px;
+  }
+  textarea{resize:vertical;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  fieldset{
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:14px 14px 4px;
+    margin:18px 0;
+  }
+  legend{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--accent);
+    padding:0 6px;
+  }
+  .gen-btn{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:12px 18px;
+    font-size:0.85rem;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    cursor:pointer;
+    border-radius:2px;
+    margin-top:8px;
+  }
+  .gen-btn:hover{background:var(--accent);}
+  .output-box{
+    margin-top:22px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    padding:18px 20px;
+    white-space:pre-wrap;
+    font-size:0.94rem;
+    line-height:1.55;
+    min-height:60px;
+    cursor:text;
+    user-select:text;
+  }
+  .copy-btn{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    background:none;
+    border:1px solid var(--ink);
+    padding:7px 14px;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    margin-top:10px;
+    border-radius:2px;
+  }
+  .copy-btn:hover{background:var(--ink);color:#fff;}
+  .wa-link{
+    display:inline-block;
+    margin-top:14px;
+    padding:11px 18px;
+    background:#25D366;
+    color:#fff;
+    text-decoration:none;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.85rem;
+    border-radius:3px;
+  }
+  .hint{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.74rem;
+    color:var(--mono);
+    margin-top:-2px;
+    margin-bottom:10px;
+  }
+  .toast{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.78rem;
+    color:var(--accent);
+    margin-left:10px;
+  }
+  .skill-group{margin-bottom:14px;}
+  .skill-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 16px;
+    margin-top:6px;
+  }
+  .skill-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.82rem;
+    color:var(--ink);
+  }
+  .skill-chip input{width:auto;}
+  .select-all{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:0.72rem;
+    color:var(--mono);
+    text-decoration:underline;
+    cursor:pointer;
+    margin-left:8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Referral Outreach Generator</h1>
+  <p class="sub">Fill once, generate Email / LinkedIn / WhatsApp text instantly.</p>
+
+  <!-- APPLYING FOR / YOE / SKILLS — TOP LEVEL, APPLIES TO ALL TABS -->
+  <fieldset>
+    <legend>Applying For</legend>
+    <div class="field" style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
+      <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.85rem; text-transform:none; letter-spacing:0; color:var(--ink);">
+        <input type="checkbox" id="applyBackend" checked onchange="onApplyChange('backend')" style="width:auto;"> Backend Developer
+      </label>
+      <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.85rem; text-transform:none; letter-spacing:0; color:var(--ink);">
+        <input type="checkbox" id="applyFullstack" onchange="onApplyChange('fullstack')" style="width:auto;"> Full Stack Developer
+      </label>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+        <label style="margin:0; font-size:0.72rem;">YOE</label>
+        <input type="number" id="yoe" value="3.5" step="0.1" style="width:70px;">
+      </div>
+    </div>
+    <div class="hint">Check only one. Selecting "Backend" hides Frontend skills below. Selecting "Full Stack" shows all skills.</div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Skills</legend>
+    <div id="skills-frontend" class="skill-group">
+      <label style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent);">Frontend</label>
+      <div class="skill-list" data-cat="Frontend"></div>
+    </div>
+    <div id="skills-backend" class="skill-group">
+      <label style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent);">Backend</label>
+      <div class="skill-list" data-cat="Backend"></div>
+    </div>
+    <div id="skills-devops" class="skill-group">
+      <label style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent);">DevOps</label>
+      <div class="skill-list" data-cat="DevOps"></div>
+    </div>
+    <div id="skills-dbms" class="skill-group">
+      <label style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent);">DBMS</label>
+      <div class="skill-list" data-cat="DBMS"></div>
+    </div>
+    <div id="skills-tools" class="skill-group">
+      <label style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--accent);">Tools</label>
+      <div class="skill-list" data-cat="Tools"></div>
+    </div>
+  </fieldset>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="email">Email</button>
+    <button class="tab-btn" data-tab="linkedin">LinkedIn</button>
+    <button class="tab-btn" data-tab="whatsapp">WhatsApp</button>
+  </div>
+
+  <!-- SHARED FIELDS -->
+  <fieldset>
+    <legend>Job Details</legend>
+    <div class="row2">
+      <div class="field"><label>Company Name</label><input id="company" placeholder="e.g. Cashfree Payments"></div>
+      <div class="field"><label>Job Role</label><input id="role" placeholder="e.g. SDE-1 Backend"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Job ID</label><input id="jobid" placeholder="e.g. REQ-2026-1123"></div>
+      <div class="field"><label>Job Link</label><input id="joblink" placeholder="https://..."></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Recipient & You</legend>
+    <div class="row2">
+      <div class="field"><label>Recipient Name</label><input id="recipient" placeholder="e.g. Ananya"></div>
+      <div class="field"><label>Recipient Designation (optional)</label><input id="recipientRole" placeholder="e.g. SDE-2, Engineering"></div>
+    </div>
+    <div class="field"><label>Personal Touch / Why Them (optional)</label>
+      <input id="personalTouch" placeholder="e.g. your post on scaling Kafka pipelines">
+    </div>
+    <div class="row2">
+      <div class="field"><label>Your Name</label><input id="myName" value="Shubham Kumar Dubey"></div>
+      <div class="field"><label>Your Email</label><input id="myEmail" value="shubhamkumar.dubey02@gmail.com"></div>
+    </div>
+    <div class="field"><label>Portfolio Link</label><input id="myPortfolio" value="shubhamdubey.in"></div>
+  </fieldset>
+
+  <!-- EMAIL PANEL -->
+  <div class="panel active" id="panel-email">
+    <button class="gen-btn" onclick="generateEmail()">Generate Email</button>
+    <div class="output-box" id="out-email">Your generated email will appear here.</div>
+    <button class="copy-btn" onclick="copyText('out-email')">Copy Text</button>
+    <span class="toast" id="toast-email"></span>
+  </div>
+
+  <!-- LINKEDIN PANEL -->
+  <div class="panel" id="panel-linkedin">
+    <button class="gen-btn" onclick="generateLinkedIn()">Generate LinkedIn Message</button>
+    <div class="output-box" id="out-linkedin">Your generated LinkedIn message will appear here.</div>
+    <button class="copy-btn" onclick="copyText('out-linkedin')">Copy Text</button>
+    <span class="toast" id="toast-linkedin"></span>
+  </div>
+
+  <!-- WHATSAPP PANEL -->
+  <div class="panel" id="panel-whatsapp">
+    <div class="field">
+      <label>Recipient WhatsApp Number (with country code, no + or spaces)</label>
+      <input id="waNumber" placeholder="e.g. 919876543210">
+      <div class="hint">Leave blank to generate text only (no direct link).</div>
+    </div>
+    <button class="gen-btn" onclick="generateWhatsApp()">Generate WhatsApp Message</button>
+    <div class="output-box" id="out-whatsapp">Your generated WhatsApp message will appear here.</div>
+    <button class="copy-btn" onclick="copyText('out-whatsapp')">Copy Text</button>
+    <span class="toast" id="toast-whatsapp"></span>
+    <br>
+    <a class="wa-link" id="wa-open-link" href="#" target="_blank" style="display:none;">Open in WhatsApp →</a>
+  </div>
+
+</div>
+
+<script>
+function val(id){ return document.getElementById(id).value.trim(); }
+
+// ----- SKILL DATA -----
+const SKILLS = {
+  Frontend: ["React", "Next.js", "Redux", "Tailwind CSS", "HTML/CSS", "JavaScript"],
+  Backend: ["Node.js", "TypeScript", "Express", "NestJS", "REST APIs", "GraphQL"],
+  DevOps: ["Docker", "AWS (ECS Fargate)", "AWS (EC2/S3)", "CI/CD", "Nginx", "Kubernetes"],
+  DBMS: ["PostgreSQL", "Redis", "MongoDB", "MySQL"],
+  Tools: ["Kafka", "BullMQ", "Prisma", "Git", "Postman", "Turborepo"]
+};
+const DEFAULT_CHECKED = ["React","Next.js","Node.js","TypeScript","Express","Docker","AWS (ECS Fargate)","PostgreSQL","Redis","Kafka","BullMQ","Prisma","Git"];
+
+function renderSkills(){
+  Object.keys(SKILLS).forEach(cat=>{
+    const container = document.querySelector(`.skill-list[data-cat="${cat}"]`);
+    let html = `<span class="select-all" onclick="toggleAll('${cat}', this)">Select all</span><br>`;
+    SKILLS[cat].forEach((skill, i)=>{
+      const id = `skill-${cat}-${i}`;
+      const checked = DEFAULT_CHECKED.includes(skill) ? "checked" : "";
+      html += `<label class="skill-chip"><input type="checkbox" id="${id}" data-cat="${cat}" data-skill="${skill}" ${checked}> ${skill}</label>`;
+    });
+    container.innerHTML = html;
+  });
+}
+
+function toggleAll(cat, el){
+  const boxes = document.querySelectorAll(`input[data-cat="${cat}"]`);
+  const allChecked = Array.from(boxes).every(b=>b.checked);
+  boxes.forEach(b=>b.checked = !allChecked);
+  el.textContent = allChecked ? "Select all" : "Clear all";
+}
+
+function onApplyChange(which){
+  const backendBox = document.getElementById('applyBackend');
+  const fullstackBox = document.getElementById('applyFullstack');
+  if(which === 'backend' && backendBox.checked){
+    fullstackBox.checked = false;
+  }
+  if(which === 'fullstack' && fullstackBox.checked){
+    backendBox.checked = false;
+  }
+  if(!backendBox.checked && !fullstackBox.checked){
+    // default fallback so one is always active
+    backendBox.checked = true;
+  }
+  updateSkillVisibility();
+}
+
+function updateSkillVisibility(){
+  const isFullstack = document.getElementById('applyFullstack').checked;
+  document.getElementById('skills-frontend').style.display = isFullstack ? 'block' : 'none';
+}
+
+function stackBlock(){
+  const isFullstack = document.getElementById('applyFullstack').checked;
+  let lines = [];
+  Object.keys(SKILLS).forEach(cat=>{
+    if(cat === 'Frontend' && !isFullstack) return; // skip frontend for backend-only applicants
+    const checked = Array.from(document.querySelectorAll(`input[data-cat="${cat}"]:checked`)).map(b=>b.dataset.skill);
+    if(checked.length) lines.push(`${cat}: ${checked.join(", ")}`);
+  });
+  return lines.join("\n");
+}
+
+function getYOE(){
+  const y = val('yoe');
+  return y || "3.5";
+}
+
+function getApplyingForLabel(){
+  return document.getElementById('applyFullstack').checked ? "Full Stack Developer" : "Backend Developer";
+}
+
+function tabSwitch(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+name));
+}
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click', ()=>tabSwitch(b.dataset.tab));
+});
+
+renderSkills();
+updateSkillVisibility();
+
+function greetingLine(){
+  const name = val('recipient') || "there";
+  const touch = val('personalTouch');
+  let line = `Hi ${name},\n\nI hope this finds you doing well`;
+  if(touch){
+    line += ` — I came across your profile and was genuinely impressed by ${touch}. It'd mean a lot to connect with someone working on things I admire.`;
+  } else {
+    line += ` — I came across your profile and was genuinely impressed by your journey. It'd mean a lot to connect with someone working on things I admire.`;
+  }
+  return line;
+}
+
+function jobLine(){
+  const company = val('company') || "[Company]";
+  const role = val('role') || "[Role]";
+  const jobid = val('jobid');
+  const link = val('joblink');
+  let line = `I noticed ${company} has an opening for ${role}`;
+  if(jobid) line += ` (Job ID: ${jobid})`;
+  if(link) line += ` — ${link}`;
+  return line + ".";
+}
+
+function generateEmail(){
+  const company = val('company') || "[Company]";
+  const role = val('role') || "[Role]";
+  const jobid = val('jobid') || "[Job ID]";
+  const myName = val('myName') || "[Your Name]";
+  const myEmail = val('myEmail') || "[Your Email]";
+  const portfolio = val('myPortfolio') || "[Portfolio]";
+  const stack = stackBlock();
+
+  const subject = `${jobid} | ${role} | ${company} | ${myName}`;
+
+  const yoe = getYOE();
+  const applyLabel = getApplyingForLabel();
+
+  let body = `Subject: ${subject}\n\n`;
+  body += greetingLine() + "\n\n";
+  body += `I'm Shubham, a ${applyLabel} with ${yoe} years of experience (ex-Infosys, worked on Toyota and Medtronic platforms). ${jobLine()}`;
+  if(stack){
+    body += `\n\nMy skill set lines up closely with the role:\n\n${stack}`;
+  }
+  body += `\n\nIf you have a few minutes, I'd be truly grateful if you could refer me for this role, or simply point me to the right person. I've attached my CV, and you can see more of my work at ${portfolio}.\n\n`;
+  body += `Thank you so much for considering this — I really appreciate your time.\n\n`;
+  body += `Warm regards,\n${myName}\n${myEmail}\n${portfolio}`;
+
+  document.getElementById('out-email').textContent = body;
+}
+
+function generateLinkedIn(){
+  const company = val('company') || "[Company]";
+  const role = val('role') || "[Role]";
+  const jobid = val('jobid') || "[Job ID]";
+  const link = val('joblink') || "[Job Link]";
+  const myName = val('myName') || "[Your Name]";
+  const myEmail = val('myEmail') || "[Your Email]";
+  const portfolio = val('myPortfolio') || "[Portfolio]";
+  const name = val('recipient') || "there";
+  const touch = val('personalTouch');
+  const stack = stackBlock();
+
+  let body = `Hi ${name}, hope you're doing great! `;
+  body += touch ? `I really admire ${touch} at ${company}. ` : `I really admire the work happening at ${company}. `;
+  body += `I'm Shubham, a ${getApplyingForLabel()} with ${getYOE()} years of experience (ex-Infosys) and noticed the ${role} opening (Job ID: ${jobid}, ${link}).`;
+  if(stack){
+    body += `\n\nMy stack:\n${stack}`;
+  }
+  body += `\n\nWould you be open to referring me, or guiding me to the right person? Happy to share my CV and portfolio (${portfolio}). Thank you so much — really appreciate it!\n\n`;
+  body += `— ${myName} | ${myEmail}`;
+
+  document.getElementById('out-linkedin').textContent = body;
+}
+
+function generateWhatsApp(){
+  const company = val('company') || "[Company]";
+  const role = val('role') || "[Role]";
+  const jobid = val('jobid') || "[Job ID]";
+  const link = val('joblink') || "[Job Link]";
+  const myName = val('myName') || "[Your Name]";
+  const portfolio = val('myPortfolio') || "[Portfolio]";
+  const name = val('recipient') || "there";
+
+  let msg = `Hi ${name}, hope you're doing well! I'm ${myName}, a ${getApplyingForLabel()} with ${getYOE()} years of experience (ex-Infosys, Node.js/TypeScript/PostgreSQL/AWS). `;
+  msg += `I saw the ${role} opening at ${company} (Job ID: ${jobid}${link ? ", " + link : ""}) and would really appreciate it if you could refer me or connect me with the right person on your team. `;
+  msg += `Happy to share my CV and portfolio (${portfolio}). Thank you so much! 🙏`;
+
+  document.getElementById('out-whatsapp').textContent = msg;
+
+  const number = val('waNumber').replace(/[^0-9]/g,'');
+  const linkEl = document.getElementById('wa-open-link');
+  if(number){
+    linkEl.href = `https://wa.me/${number}?text=${encodeURIComponent(msg)}`;
+    linkEl.style.display = 'inline-block';
+  } else {
+    linkEl.style.display = 'none';
+  }
+}
+
+function copyText(id){
+  const text = document.getElementById(id).textContent;
+  const tab = id.split('-')[1];
+  const toast = document.getElementById('toast-'+tab);
+
+  function showCopied(){
+    toast.textContent = "Copied!";
+    setTimeout(()=>{ toast.textContent = ""; }, 1800);
+  }
+  function showFailed(){
+    toast.textContent = "Copy failed — select text manually.";
+    setTimeout(()=>{ toast.textContent = ""; }, 2500);
+  }
+
+  // Try modern Clipboard API first (works on https / non-sandboxed contexts)
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(showCopied).catch(()=>{
+      fallbackCopy(text, showCopied, showFailed);
+    });
+  } else {
+    fallbackCopy(text, showCopied, showFailed);
+  }
+}
+
+function fallbackCopy(text, onSuccess, onFail){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  ta.style.top = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try{
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(ok) onSuccess(); else onFail();
+  }catch(e){
+    document.body.removeChild(ta);
+    onFail();
+  }
+}
+</script>
+</body>
+</html>
